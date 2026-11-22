@@ -65,6 +65,8 @@ Two things you must internalise before anything else:
 | `tests/unit/` | — | Fast, host-independent contract tests, including `test_workstation_audit.sh` and `test_brewup.sh` |
 | `tests/test_*.sh` | — | Live integration tests (minutes, touch the real machine read-only) |
 
+GitHub Actions runs `make test-live PRIVATE_TEST_LOGS=1` so its logs contain only the test names and failure status. The scheduled and manual upstream checks verify the Apple update feed over TLS against the SHA-256-pinned Apple Root CA certificate.
+
 The unified CLI writes results to Git-ignored `security-results/{assessments,monitoring,developer,remediation}/<timestamp>/`, each with a `latest` symlink. Run directories use mode `0700`. Choose an ignored directory or a path outside a checkout for custom report output.
 
 ---

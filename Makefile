@@ -14,11 +14,18 @@ test-fast: lint self-test
 	./tests/unit/test_network_import.sh
 
 # Live: runs real posture/triage/assessment/monitor on this Mac (several minutes).
+live_tests := ./tests/test_macos_security_posture.sh ./tests/test_macos_security_triage.sh \
+	./tests/test_assessment_runner.sh ./tests/test_security_workflow_contracts.sh
+
 test-live:
-	./tests/test_macos_security_posture.sh
-	./tests/test_macos_security_triage.sh
-	./tests/test_assessment_runner.sh
-	./tests/test_security_workflow_contracts.sh
+	@set -eu; for test in $(live_tests); do \
+		printf '%s\n' "$$test"; \
+		if [ "$(PRIVATE_TEST_LOGS)" = 1 ]; then \
+			"$$test" >/dev/null 2>&1 || { printf 'Live check failed: %s\n' "$$test" >&2; exit 1; }; \
+		else \
+			"$$test"; \
+		fi; \
+	done
 
 test: test-fast test-live
 

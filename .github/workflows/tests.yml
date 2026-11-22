@@ -42,12 +42,7 @@ jobs:
         shell: sh
         run: |
           test "$(id -u)" -ne 0
-          log=$(mktemp)
-          trap 'rm -f "$log"' EXIT
-          if ! make test-live >"$log" 2>&1; then
-            printf '%s\n' 'Live checks failed. Reproduce with make test-live in an isolated macOS environment.'
-            exit 1
-          fi
+          make test-live PRIVATE_TEST_LOGS=1
 
   compatibility:
     name: Compatibility (${{ matrix.runner }})
@@ -71,9 +66,4 @@ jobs:
         shell: sh
         run: |
           test "$(id -u)" -ne 0
-          log=$(mktemp)
-          trap 'rm -f "$log"' EXIT
-          if ! make test-live >"$log" 2>&1; then
-            printf '%s\n' 'Live checks failed. Reproduce with make test-live in an isolated macOS environment.'
-            exit 1
-          fi
+          make test-live PRIVATE_TEST_LOGS=1
