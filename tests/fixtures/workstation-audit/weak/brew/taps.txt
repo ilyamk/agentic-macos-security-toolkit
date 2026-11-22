@@ -1,0 +1,3 @@
+homebrew/core
+homebrew/cask
+example-org/tools

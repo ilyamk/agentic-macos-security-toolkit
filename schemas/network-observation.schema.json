@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/network-observation.schema.json",
+  "title": "Imported outbound network observation",
+  "type": "object",
+  "required": [
+    "schema",
+    "direction",
+    "observed_at",
+    "protocol",
+    "decision"
+  ],
+  "properties": {
+    "schema": {
+      "const": "macos-security-network-observation/v1"
+    },
+    "direction": {
+      "const": "outbound"
+    },
+    "observed_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "protocol": {
+      "enum": [
+        "tcp",
+        "udp"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "observed",
+        "allowed",
+        "blocked"
+      ]
+    },
+    "remote_scope": {
+      "enum": [
+        "local",
+        "public",
+        "unknown"
+      ]
+    },
+    "pid": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "process_start_us": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  }
+}

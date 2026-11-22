@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/triage-record.schema.json",
+  "title": "macOS security triage JSONL record",
+  "type": "object",
+  "required": ["schema", "record_type"],
+  "properties": {
+    "schema": {"const": "macos-security-triage/v3"},
+    "record_type": {"enum": ["meta", "inventory", "finding", "summary"]},
+    "id": {"type": "string"},
+    "severity": {"enum": ["info", "low", "medium", "high", "critical"]},
+    "confidence": {"enum": ["low", "medium", "high"]},
+    "class": {"enum": ["configuration", "exposure", "anomaly", "detection", "visibility_gap"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"record_type": {"const": "finding"}}}, "then": {"required": ["id", "category", "severity", "confidence", "status", "class", "title", "detail", "evidence", "remediation"]}}
+  ],
+  "additionalProperties": true
+}

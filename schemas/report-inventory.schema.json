@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/report-inventory.schema.json",
+  "title": "Local report storage and retention preview",
+  "type": "object",
+  "required": ["schema", "record_type", "mode", "older_than_days", "mutates", "candidate_count", "reports"],
+  "properties": {
+    "schema": {"const": "macos-security-report-inventory/v1"},
+    "record_type": {"const": "report_inventory"},
+    "mode": {"enum": ["list", "prune_plan"]},
+    "older_than_days": {"type": ["integer", "null"]},
+    "mutates": {"const": false},
+    "candidate_count": {"type": "integer", "minimum": 0},
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["run_id", "kind", "root", "state", "age_days", "kib_on_disk", "protected", "prune_candidate"],
+        "properties": {
+          "run_id": {"type": "string"},
+          "kind": {"enum": ["assessments", "monitoring", "developer", "remediation"]},
+          "root": {
+            "enum": ["security-results/assessments", "security-results/monitoring", "security-results/developer", "security-results/remediation", "audit-results", "monitoring-results", "remediation-results"]
+          },
+          "state": {"enum": ["incomplete", "marked_complete"]},
+          "age_days": {"type": "integer", "minimum": 0},
+          "kib_on_disk": {"type": ["integer", "null"]},
+          "protected": {"type": "boolean"},
+          "prune_candidate": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/event.schema.json",
+  "title": "Normalized macOS security event",
+  "type": "object",
+  "required": ["schema", "record_type", "observed_at", "kind", "category", "source", "confidence", "data", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-event/v1"},
+    "record_type": {"const": "event"},
+    "observed_at": {"type": "string"},
+    "kind": {"type": "string"},
+    "category": {"type": "string"},
+    "source": {"type": "string"},
+    "confidence": {"enum": ["low", "medium", "high"]},
+    "data": {"type": "object", "properties": {
+      "process_start_us": {"type": ["integer", "null"], "minimum": 1, "maximum": 4102444800000000},
+      "exec_target_present": {"type": "boolean"},
+      "timestamp_reported": {"type": "boolean"}
+    }},
+    "evidence_trust": {"const": "untrusted_observations"}
+  }
+}

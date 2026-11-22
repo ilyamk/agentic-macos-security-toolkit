@@ -1,0 +1,14 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Fake Homebrew for tests: canned output from $WA_FAKE_BREW_DATA, argv logged.
+printf '%s|%s\n' "${HOMEBREW_NO_AUTO_UPDATE:-unset}" "$*" >>"$WA_FAKE_BREW_LOG"
+case "$*" in
+    --version) printf '%s\n' 'Homebrew 7.0.0' ;;
+    config) printf 'HOMEBREW_VERSION: 7.0.0\nHOMEBREW_PREFIX: %s\n' "$WA_FAKE_BREW_PREFIX" ;;
+    tap) /bin/cat "$WA_FAKE_BREW_DATA/taps.txt" ;;
+    'tap-info --json --installed') [ -f "$WA_FAKE_BREW_DATA/tapinfo.json" ] || exit 1; /bin/cat "$WA_FAKE_BREW_DATA/tapinfo.json" ;;
+    developer) /bin/cat "$WA_FAKE_BREW_DATA/developer.txt" ;;
+    'info --json=v2 --installed') /bin/cat "$WA_FAKE_BREW_DATA/info.json" ;;
+    'list --full-name') /usr/bin/jq -r '.formulae[].full_name, .casks[].full_token' "$WA_FAKE_BREW_DATA/info.json" ;;
+    *) printf 'FORBIDDEN|%s\n' "$*" >>"$WA_FAKE_BREW_LOG"; exit 99 ;;
+esac

@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "example-browser": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@example-org/browser-mcp"
+      ],
+      "env": {
+        "EXAMPLE_API_KEY": "FAKE-ENV-VALUE"
+      }
+    }
+  },
+  "projects": {
+    "/Users/example/my-project": {
+      "mcpServers": {
+        "project-memory": {
+          "command": "npx",
+          "args": [
+            "@modelcontextprotocol/server-memory@1.2.3"
+          ]
+        }
+      }
+    }
+  }
+}

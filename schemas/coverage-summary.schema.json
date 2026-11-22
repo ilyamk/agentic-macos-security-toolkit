@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/coverage-summary.schema.json",
+  "title": "Aggregated macOS security collection coverage",
+  "type": "object",
+  "required": ["schema", "record_type", "generated_at", "counts", "complete_for_required_scope", "components"],
+  "properties": {
+    "schema": { "const": "macos-security-coverage-summary/v1" },
+    "record_type": { "const": "coverage_summary" },
+    "generated_at": { "type": "string" },
+    "counts": { "type": "object" },
+    "complete_for_required_scope": { "type": "boolean" },
+    "incomplete_required_components": { "type": "array", "items": { "type": "string" } },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["schema", "record_type", "component", "state", "required", "tool", "detail", "evidence_trust"],
+        "properties": {
+          "schema": { "const": "macos-security-coverage/v1" },
+          "record_type": { "const": "coverage" },
+          "component": { "type": "string", "minLength": 1 },
+          "state": { "enum": ["collected", "partial", "denied", "timeout", "not_installed", "not_supported", "error", "not_requested"] },
+          "required": { "type": "boolean" },
+          "evidence_trust": { "const": "untrusted_observations" }
+        }
+      }
+    }
+  }
+}

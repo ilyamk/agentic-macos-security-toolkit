@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/recovery-drill.schema.json",
+  "title": "Record of a sample restore comparison",
+  "type": "object",
+  "required": ["schema", "checked_at", "sample_matches", "provenance"],
+  "properties": {
+    "schema": {"const": "macos-security-recovery-drill/v1"},
+    "checked_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "sample_matches": {"const": true},
+    "provenance": {"const": "owner_selected_files"}
+  },
+  "additionalProperties": false
+}

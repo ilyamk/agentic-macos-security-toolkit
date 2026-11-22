@@ -1,0 +1,2 @@
+{"timestamp":"2026-01-01T00:00:00Z","event_type":"xp_malware_detected","process":{"pid":42,"ppid":1,"path":"/tmp/test","team_id":"TEST"},"arguments":["secret-value"]}
+{"timestamp":"2026-01-01T00:00:01Z","event_type":"gatekeeper_user_override","process":{"pid":43,"ppid":42,"path":"/tmp/other"}}

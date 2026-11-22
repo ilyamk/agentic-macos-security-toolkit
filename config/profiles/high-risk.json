@@ -1,0 +1,13 @@
+{
+  "$schema": "../../schemas/security-policy.schema.json",
+  "schema": "macos-security-policy/v1",
+  "policy_id": "high-risk-mac",
+  "threat_model": {"name": "High-risk Mac exposed to targeted malware or spyware", "asset_value": "critical", "assumptions": ["Targeted attacks are plausible.", "Any unexpected remote service or persistence requires review."]},
+  "expected_services": {"screen_sharing": false, "smb_guest": false, "remote_login": false, "remote_management": false, "legacy_vnc": false},
+  "trusted_network_scopes": ["loopback", "managed-vpn"],
+  "expected_extension_ids": [],
+  "adapters": {"assessment": ["knockknock"], "incident": ["knockknock", "clamav"], "developer": ["osv-scanner", "gitleaks"], "monitoring": ["santa"]},
+  "dependency_policy": {"auto_install": false, "manager": "homebrew", "allow_casks": true, "allow_network": true},
+  "privacy": {"collect_secret_values": false, "online_hash_lookup": false, "default_redaction": true},
+  "remediation": {"auto_apply": false, "require_confirmation": true, "require_rollback": true}
+}

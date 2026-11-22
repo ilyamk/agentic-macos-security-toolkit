@@ -1,0 +1,8 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Fake gh: prints an account line the audit must never echo.
+if [ "$1" = auth ] && [ "${2:-}" = status ]; then
+    printf '%s\n' 'Logged in to github.example.com account example-user'
+    exit "${WA_FAKE_GH_RC:-0}"
+fi
+exit 99

@@ -1,0 +1,8 @@
+model = "example"
+
+[mcp_servers.fetch]
+command = "uvx"
+args = ["mcp-server-fetch==2025.1.0"]
+
+[mcp_servers.fetch.env]
+EXAMPLE_TOKEN = "FAKE-ENV-VALUE"

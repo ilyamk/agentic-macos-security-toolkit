@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/finding.schema.json",
+  "title": "Normalized macOS Security Finding",
+  "type": "object",
+  "required": ["schema", "record_type", "source", "id", "status", "severity", "confidence", "class", "title", "detail", "expected", "decision_status", "requires_confirmation", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-finding/v1"},
+    "record_type": {"const": "finding"},
+    "source": {"enum": ["posture", "triage", "monitor", "native", "adapters"]},
+    "id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["pass", "info", "warn", "fail", "error", "unknown"]},
+    "severity": {"enum": ["info", "low", "medium", "high", "critical"]},
+    "confidence": {"enum": ["low", "medium", "high"]},
+    "class": {"enum": ["configuration", "exposure", "anomaly", "detection", "visibility_gap"]},
+    "title": {"type": "string"},
+    "detail": {"type": "string"},
+    "expected": {"type": "boolean"},
+    "decision_status": {"enum": ["no_action", "review", "accepted_expected_service"]},
+    "requires_confirmation": {"type": "boolean"},
+    "evidence_trust": {"const": "untrusted_observations"}
+  }
+}

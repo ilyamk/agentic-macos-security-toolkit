@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/agent-context.schema.json",
+  "title": "Deterministic context for a security analysis agent",
+  "type": "object",
+  "required": ["schema", "record_type", "generated_at", "run_id", "report_dir", "policy_id", "threat_model", "coverage", "risk_dimensions", "compromise_assessment", "requires_review", "artifacts", "guardrails", "next_actions"],
+  "properties": {
+    "schema": { "const": "macos-security-agent-context/v1" },
+    "record_type": { "const": "agent_context" },
+    "generated_at": { "type": "string" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "report_dir": { "type": "string", "minLength": 1 },
+    "policy_id": { "type": "string" },
+    "threat_model": { "type": "object" },
+    "coverage": { "type": "object" },
+    "risk_dimensions": { "type": "object" },
+    "compromise_assessment": { "type": "string" },
+    "requires_review": { "type": "boolean" },
+    "artifacts": { "type": "object" },
+    "guardrails": { "type": "array", "items": { "type": "string" } },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["purpose", "command", "requires_root", "when"],
+        "properties": {
+          "purpose": { "type": "string" },
+          "command": { "type": "string" },
+          "requires_root": { "type": "boolean" },
+          "when": { "type": "string" }
+        }
+      }
+    }
+  }
+}

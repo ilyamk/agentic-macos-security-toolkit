@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/repo-preflight.schema.json",
+  "title": "Repository preflight",
+  "type": "object",
+  "required": ["schema", "record_type", "scope", "requires_review", "coverage", "findings", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-repo-preflight/v1"},
+    "record_type": {"const": "repo_preflight"},
+    "scope": {"const": "selected_root_allow_list"},
+    "requires_review": {"type": "boolean"},
+    "coverage": {"enum": ["selected_scope", "partial"]},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "line", "trigger", "state", "detail"],
+        "properties": {
+          "id": {"type": "string"},
+          "path": {"type": "string"},
+          "line": {"type": ["integer", "null"]},
+          "trigger": {
+            "enum": ["git_operation", "editor_open", "directory_enter", "dependency_install", "container_start", "agent_start"]
+          },
+          "state": {"enum": ["review", "unknown"]},
+          "detail": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence_trust": {"const": "untrusted_observations"}
+  },
+  "additionalProperties": false
+}

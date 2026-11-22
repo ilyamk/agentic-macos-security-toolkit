@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/workstation-audit-record.schema.json",
+  "title": "Workstation supply-chain and agent-hygiene audit JSONL record",
+  "type": "object",
+  "required": ["schema", "id", "status", "title", "detail", "playbook", "attack_ids", "remediation"],
+  "properties": {
+    "schema": {
+      "const": "macos-security-workstation-audit/v1"
+    },
+    "id": {
+      "enum": ["HB-01", "HB-02", "HB-03", "HB-04", "HB-05", "HB-06", "HB-07", "HB-08", "HB-09", "HB-10", "HB-11", "HB-12", "NPM-01", "NPM-02", "NPM-03", "NPM-04", "NPM-05", "PNPM-01", "PNPM-02", "NODE-01", "NODE-02", "NODE-03", "UV-01", "SHELL-01", "SHELL-02", "OSEE-01", "OSEE-02", "OSEE-03", "TCC-01", "AGENT-01"]
+    },
+    "status": {
+      "enum": ["pass", "warn", "fail", "info", "unknown", "not_applicable"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "detail": {
+      "type": "string"
+    },
+    "playbook": {
+      "enum": ["PB-01", "PB-02", "PB-03", "PB-04"]
+    },
+    "attack_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^ATK-(0[1-9]|1[0-9]|2[0-6])$"
+      }
+    },
+    "remediation": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,18 @@
+{
+  "formulae": [
+    {
+      "name": "jq",
+      "full_name": "jq",
+      "tap": "homebrew/core"
+    }
+  ],
+  "casks": [
+    {
+      "token": "knockknock",
+      "full_token": "knockknock",
+      "tap": "homebrew/cask",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "auto_updates": null
+    }
+  ]
+}

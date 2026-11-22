@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/agent-export.schema.json",
+  "title": "Minimal report for an AI agent",
+  "type": "object",
+  "required": ["schema", "record_type", "audience", "bundle_sha256", "evidence_trust", "review_count", "truncated", "coverage", "findings", "actions", "consent"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "macos-security-agent-export/v1"},
+    "record_type": {"const": "agent_export"},
+    "audience": {"const": "agent"},
+    "bundle_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "evidence_trust": {"const": "untrusted_observations"},
+    "review_count": {"type": "integer", "minimum": 0},
+    "truncated": {"type": "boolean"},
+    "coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["state", "required", "count"],
+        "additionalProperties": false,
+        "properties": {
+          "state": {"enum": ["collected", "partial", "denied", "not_installed", "not_supported", "timeout", "error", "not_requested"]},
+          "required": {"type": "boolean"},
+          "count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ordinal", "source", "status", "severity", "confidence", "class", "control", "action"],
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {"type": "integer", "minimum": 1},
+          "source": {"enum": ["posture", "triage", "monitor", "native", "adapters"]},
+          "status": {"enum": ["pass", "info", "warn", "fail", "error", "unknown"]},
+          "severity": {"enum": ["info", "low", "medium", "high", "critical"]},
+          "confidence": {"enum": ["low", "medium", "high"]},
+          "class": {"enum": ["configuration", "exposure", "anomaly", "detection", "visibility_gap"]},
+          "control": {"enum": [null, "macos_patch_level", "offered_updates", "system_integrity_protection", "filevault", "gatekeeper", "application_firewall", "firewall_stealth", "remote_login", "screen_sharing"]},
+          "action": {
+            "type": "object",
+            "required": ["id", "arguments", "mutates"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"const": "review-finding"},
+              "arguments": {"type": "object", "required": ["ordinal"], "additionalProperties": false,
+                "properties": {"ordinal": {"type": "integer", "minimum": 1}}},
+              "mutates": {"const": false}
+            }
+          }
+        }
+      }
+    },
+    "actions": {"const": [{"id": "review-coverage", "arguments": {}, "mutates": false}]},
+    "consent": {"const": "Owner approval is required for privileged or mutating actions."}
+  }
+}

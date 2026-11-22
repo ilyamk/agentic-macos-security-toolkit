@@ -1,0 +1,255 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# brewup: cautious Homebrew upgrade with a cool-down.
+#  - upgrades a version only after it has been seen as outdated for COOLDOWN
+#    days (most poisoned releases are caught and pulled within days);
+#  - versions with known vulnerabilities (OSV.dev) skip the cool-down;
+#  - flags packages from third-party taps; pinned formulae and casks are never
+#    upgraded;
+#  - after one confirmation, upgrades, autoremoves, cleans up (keeping the
+#    previous version of anything just upgraded) and refreshes the Brewfile,
+#    keeping a backup and showing what changed.
+# Standalone by design (installed outside the repository), so it does not
+# source lib/. brew and jq are taken from PATH.
+
+set -u
+
+cooldown=${BREWUP_COOLDOWN_DAYS:-3}
+assume_yes=0 dry_run=0 ignore_cooldown=0 no_update=0
+
+usage() {
+    /bin/cat <<'EOF'
+Usage: brewup [-n] [-N] [-y] [-a] [-d DAYS]
+  -n  dry run: show the plan, upgrade and remove nothing (still runs
+      brew update unless -N, and records first-seen times)
+  -N  skip brew update; work from the current local Homebrew state
+  -y  do not ask for confirmation
+  -a  ignore the cool-down (upgrade everything outdated except pinned)
+  -d  cool-down in days (default 3, env BREWUP_COOLDOWN_DAYS)
+State:    $XDG_STATE_HOME/brewup/seen.tsv (default ~/.local/state/brewup/seen.tsv)
+Brewfile: $BREWUP_BREWFILE (absolute path), else $XDG_CONFIG_HOME/homebrew/Brewfile
+          or ~/.homebrew/Brewfile
+EOF
+}
+
+die() { printf 'brewup: %s\n' "$2" >&2; exit "$1"; }
+
+is_uint() {
+    case ${1:-} in
+        ''|*[!0-9]*) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    c_blue=$(printf '\033[34m') c_yellow=$(printf '\033[33m') c_off=$(printf '\033[0m')
+else
+    c_blue='' c_yellow='' c_off=''
+fi
+step() { printf '%s==>%s %s\n' "$c_blue" "$c_off" "$1"; }
+warn() { printf '%swarning:%s %s\n' "$c_yellow" "$c_off" "$1" >&2; }
+
+while getopts "nNyad:h" opt; do
+    case $opt in
+        n) dry_run=1 ;;
+        N) no_update=1 ;;
+        y) assume_yes=1 ;;
+        a) ignore_cooldown=1 ;;
+        d) cooldown=$OPTARG ;;
+        h) usage; exit 0 ;;
+        *) usage >&2; exit 2 ;;
+    esac
+done
+shift $((OPTIND - 1))
+[ "$#" -eq 0 ] || { usage >&2; exit 2; }
+is_uint "$cooldown" || die 2 "cool-down must be a non-negative integer number of days: $cooldown"
+# Normalise (strips leading zeros so arithmetic never reads it as octal).
+cooldown=$(printf '%s\n' "$cooldown" | /usr/bin/sed 's/^0*//')
+cooldown=${cooldown:-0}
+
+if [ -n "${XDG_CONFIG_HOME:-}" ]; then
+    brew_config_dir=$XDG_CONFIG_HOME/homebrew
+else
+    brew_config_dir=$HOME/.homebrew
+fi
+brewfile=${BREWUP_BREWFILE:-$brew_config_dir/Brewfile}
+case $brewfile in
+    /*[!/]) ;;
+    *) die 2 "BREWUP_BREWFILE must be an absolute file path: $brewfile" ;;
+esac
+[ ! -d "$brewfile" ] || die 2 "Brewfile path is a directory: $brewfile"
+
+command -v brew >/dev/null 2>&1 || die 2 "brew not found on PATH"
+command -v jq >/dev/null 2>&1 || die 2 "jq is required (brew install jq)"
+
+state_dir=${XDG_STATE_HOME:-$HOME/.local/state}/brewup
+state=$state_dir/seen.tsv
+# State is private; the restrictive umask is confined to this subshell so that
+# brew itself keeps the user's normal umask.
+(umask 077; /bin/mkdir -p "$state_dir" && : >>"$state") ||
+    die 1 "cannot create state file $state"
+
+work=$(/usr/bin/mktemp -d "${TMPDIR:-/tmp}/brewup.XXXXXX") || die 1 "mktemp failed"
+state_tmp=''
+# Invoked by the EXIT trap.
+# shellcheck disable=SC2329
+cleanup() { /bin/rm -rf "$work"; [ -z "$state_tmp" ] || /bin/rm -f "$state_tmp"; }
+trap cleanup EXIT
+trap 'exit 130' HUP INT TERM
+
+now=$(/bin/date +%s)
+us=$(printf '\037')
+
+if [ "$no_update" -eq 1 ]; then
+    step "brew update skipped (-N): using the local Homebrew state"
+else
+    step "brew update"
+    brew update --quiet || die 1 "brew update failed"
+fi
+
+if brew outdated --vulnerable --quiet >"$work/vulnerable" 2>/dev/null; then
+    :
+else
+    : >"$work/vulnerable"
+    warn "vulnerability scan (OSV.dev) failed; no cool-down bypass this run"
+fi
+{
+    brew list --full-name --formula 2>/dev/null
+    brew list --full-name --cask 2>/dev/null
+} | /usr/bin/grep / >"$work/third_party" || :
+
+brew outdated --json=v2 >"$work/outdated.json" || die 1 "brew outdated failed"
+# Tap formulae are reported by full name (user/tap/name). Unit separator, not
+# tab: tab is IFS whitespace and would collapse empty fields.
+jq -r '
+  (.formulae[] | ["formula", .name, (.installed_versions|join(",")), .current_version, ((.pinned // false)|tostring)]),
+  (.casks[]    | ["cask",    .name, (.installed_versions|join(",")), .current_version, ((.pinned // false)|tostring)])
+  | join("\u001f")' "$work/outdated.json" >"$work/rows" || die 1 "cannot parse brew outdated output"
+
+# First-seen epoch of an outdated version from "kind<TAB>name<TAB>version<TAB>epoch".
+first_seen() {
+    /usr/bin/awk -F '\t' -v k="$1" -v n="$2" -v v="$3" \
+        '$1 == k && $2 == n && $3 == v { print $4; exit }' "$state"
+}
+
+ready_formulae='' ready_casks='' n_formulae=0 n_casks=0
+if [ ! -s "$work/rows" ]; then
+    printf '%s\n' "Everything is up to date."
+    : >"$state"
+else
+    state_tmp=$(/usr/bin/mktemp "$state_dir/seen.tsv.XXXXXX") || die 1 "mktemp failed"
+    printf '\n%-8s %-32s %-28s %s\n' KIND NAME VERSION STATUS
+    while IFS=$us read -r kind name installed current pinned; do
+        [ -n "$kind" ] || continue
+        first=$(first_seen "$kind" "$name" "$current")
+        is_uint "$first" || first=$now
+        printf '%s\t%s\t%s\t%s\n' "$kind" "$name" "$current" "$first" >>"$state_tmp"
+        age=$(( (now - first) / 86400 ))
+        short=${name##*/}
+        tags=''
+        case $name in
+            */*) tags=" [3rd-party: ${name%/*}]" ;;
+            *)
+                # Exact full-name match: user/tap/<name> as listed by brew.
+                full=$(/usr/bin/awk -v n="$name" '{ s = $0; sub(/.*\//, "", s); if (s == n) { print; exit } }' "$work/third_party")
+                [ -z "$full" ] || tags=" [3rd-party: ${full%/*}]" ;;
+        esac
+        if [ "$pinned" = true ]; then
+            verdict="pinned"
+        elif /usr/bin/grep -Fxq -e "$name" -e "$short" "$work/vulnerable"; then
+            verdict="VULNERABLE: upgrade now"
+        elif [ "$ignore_cooldown" -eq 1 ] || [ "$age" -ge "$cooldown" ]; then
+            verdict="ready (seen ${age}d)"
+        else
+            verdict="waiting $((cooldown - age))d more"
+        fi
+        case $verdict in
+            ready*|VULNERABLE*)
+                if [ "$kind" = formula ]; then
+                    ready_formulae="$ready_formulae${ready_formulae:+ }$name"; n_formulae=$((n_formulae + 1))
+                else
+                    ready_casks="$ready_casks${ready_casks:+ }$name"; n_casks=$((n_casks + 1))
+                fi ;;
+        esac
+        printf '%-8s %-32s %-28s %s%s\n' "$kind" "$name" "$installed -> $current" "$verdict" "$tags"
+    done <"$work/rows"
+    # Keep only versions still outdated, so the file never grows.
+    /bin/mv -f "$state_tmp" "$state" || die 1 "cannot update $state"
+    state_tmp=''
+    if [ $((n_formulae + n_casks)) -eq 0 ]; then
+        printf '\n%s\n' "Nothing past the cool-down yet."
+    elif [ "$dry_run" -eq 1 ]; then
+        printf '\nDry run: would upgrade %s\n' "$ready_formulae${ready_formulae:+${ready_casks:+ }}$ready_casks"
+    fi
+fi
+
+[ "$dry_run" -eq 0 ] || exit 0
+
+printf '\n'; step "brew autoremove --dry-run"
+brew autoremove --dry-run || warn "brew autoremove --dry-run failed"
+
+if [ "$assume_yes" -eq 0 ]; then
+    if ! ( : </dev/tty ) 2>/dev/null; then
+        printf '\n%s\n' "No terminal to confirm on; nothing changed (use -y to skip confirmation)."
+        exit 0
+    fi
+    if [ $((n_formulae + n_casks)) -gt 0 ]; then
+        question="Upgrade $n_formulae formula(e) and $n_casks cask(s), then autoremove, clean up and refresh the Brewfile?"
+    else
+        question="Nothing to upgrade. Autoremove, clean up and refresh the Brewfile?"
+    fi
+    printf '\n%s [y/N] ' "$question" >/dev/tty
+    answer=''
+    read -r answer </dev/tty || answer=''
+    case $answer in
+        y|Y) ;;
+        *) printf '%s\n' "Nothing changed."; exit 0 ;;
+    esac
+fi
+
+# Do not let brew upgrade outdated dependents of the chosen formulae (past
+# their cool-down) or clean up the previous versions straight away.
+HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 HOMEBREW_NO_INSTALL_CLEANUP=1
+export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK HOMEBREW_NO_INSTALL_CLEANUP
+# Word splitting is intended: names never contain whitespace.
+# shellcheck disable=SC2086
+if [ "$n_formulae" -gt 0 ]; then
+    brew upgrade --formula $ready_formulae || die 1 "brew upgrade --formula failed"
+fi
+# shellcheck disable=SC2086
+if [ "$n_casks" -gt 0 ]; then
+    brew upgrade --cask $ready_casks || die 1 "brew upgrade --cask failed"
+fi
+
+printf '\n'; step "cleanup"
+brew autoremove || die 1 "brew autoremove failed"
+# Keep the previous version of every formula upgraded in this run, so it can
+# be rolled back to; the next run's cleanup removes it.
+keep=$(printf '%s' "$ready_formulae" | /usr/bin/tr ' ' ',')
+keep="${HOMEBREW_NO_CLEANUP_FORMULAE:-}${HOMEBREW_NO_CLEANUP_FORMULAE:+${keep:+,}}$keep"
+if [ -n "$keep" ]; then
+    HOMEBREW_NO_CLEANUP_FORMULAE=$keep brew cleanup || die 1 "brew cleanup failed"
+else
+    brew cleanup || die 1 "brew cleanup failed"
+fi
+
+/bin/mkdir -p "${brewfile%/*}" || die 1 "cannot create ${brewfile%/*}"
+old=$work/Brewfile.old
+: >"$old"
+if [ -f "$brewfile" ]; then
+    /bin/cp "$brewfile" "$old" || die 1 "cannot copy $brewfile"
+    /bin/cp -p "$brewfile" "$brewfile.bak-$(/bin/date -u '+%Y%m%dT%H%M%SZ')" || die 1 "cannot back up $brewfile"
+    # Keep the newest three backups (UTC stamps sort lexically; globs sort).
+    set -- "$brewfile".bak-*
+    while [ "$#" -gt 3 ]; do /bin/rm -f "$1"; shift; done
+fi
+brew bundle dump --file="$brewfile" --force --no-vscode || die 1 "brew bundle dump failed"
+if ! /usr/bin/cmp -s "$old" "$brewfile"; then
+    case $brewfile in
+        "$HOME"/*) shown="~${brewfile#"$HOME"}" ;;
+        *) shown=$brewfile ;;
+    esac
+    printf '\n'; step "$shown changed:"
+    /usr/bin/diff -u "$old" "$brewfile" | /usr/bin/tail -n +3
+fi
+exit 0

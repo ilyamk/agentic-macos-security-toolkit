@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/assessment-manifest.schema.json",
+  "title": "macOS Security Assessment Manifest",
+  "type": "object",
+  "required": ["schema", "record_type", "run_id", "completed_at", "complete", "target_user", "policy", "artifacts", "agent_read_order", "agent_guardrail", "posture_summary", "triage_summary"],
+  "properties": {
+    "schema": {"const": "macos-security-assessment/v3"},
+    "record_type": {"const": "assessment_manifest"},
+    "run_id": {"type": "string"},
+    "completed_at": {"type": "string", "format": "date-time"},
+    "complete": {"const": true},
+    "target_user": {"type": "string"},
+    "policy": {"type": "string"},
+    "artifacts": {"type": "object"},
+    "agent_read_order": {"type": "array", "items": {"type": "string"}},
+    "agent_guardrail": {"type": "string"}
+  }
+}

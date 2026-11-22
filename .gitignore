@@ -1,0 +1,27 @@
+# Local security reports contain host, account, process, persistence, and network evidence.
+/audit-results/
+/monitoring-results/
+/remediation-results/
+/security-results/
+/private-notes/
+/.codegraph/
+
+# Legacy report names used by shell redirection examples.
+/mac-security-report.jsonl
+/report.jsonl
+/report-redacted.jsonl
+
+# Local secrets and macOS metadata.
+.env
+.env.*
+!.env.example
+.envrc
+.DS_Store
+*.key
+*.pem
+*.p12
+*.pfx
+*.mobileprovision
+.netrc
+id_rsa
+id_ed25519

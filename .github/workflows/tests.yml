@@ -1,0 +1,79 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '21 5 * * 2'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: Fast checks
+    runs-on: macos-26
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install verified test tools
+        run: |
+          ./tools/ci/install-tools.sh "$RUNNER_TEMP/msc-bin" jq shellcheck
+          printf '%s\n' "$RUNNER_TEMP/msc-bin" >> "$GITHUB_PATH"
+      - run: make test-fast
+
+  live:
+    name: Unprivileged live checks
+    runs-on: macos-26
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run live tests without publishing host evidence
+        shell: sh
+        run: |
+          test "$(id -u)" -ne 0
+          log=$(mktemp)
+          trap 'rm -f "$log"' EXIT
+          if ! make test-live >"$log" 2>&1; then
+            printf '%s\n' 'Live checks failed. Reproduce with make test-live in an isolated macOS environment.'
+            exit 1
+          fi
+
+  compatibility:
+    name: Compatibility (${{ matrix.runner }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-26-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install verified test tools
+        run: |
+          ./tools/ci/install-tools.sh "$RUNNER_TEMP/msc-bin" jq shellcheck
+          printf '%s\n' "$RUNNER_TEMP/msc-bin" >> "$GITHUB_PATH"
+      - run: make test-fast
+      - name: Run live tests without publishing host evidence
+        shell: sh
+        run: |
+          test "$(id -u)" -ne 0
+          log=$(mktemp)
+          trap 'rm -f "$log"' EXIT
+          if ! make test-live >"$log" 2>&1; then
+            printf '%s\n' 'Live checks failed. Reproduce with make test-live in an isolated macOS environment.'
+            exit 1
+          fi

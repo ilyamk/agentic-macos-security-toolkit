@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/diff.schema.json",
+  "title": "macOS security assessment diff",
+  "type": "object",
+  "required": ["schema", "record_type", "baseline_established", "previous_run", "added", "resolved", "changed"],
+  "properties": {
+    "schema": {"const": "macos-security-diff/v1"},
+    "record_type": {"const": "assessment_diff"},
+    "baseline_established": {"type": "boolean"},
+    "previous_run": {"type": ["string", "null"]},
+    "added": {"type": "array"},
+    "resolved": {"type": "array"},
+    "not_observed": {"type": "array"},
+    "changed": {"type": "array"}
+  },
+  "additionalProperties": false
+}

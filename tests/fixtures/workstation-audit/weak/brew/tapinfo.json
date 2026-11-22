@@ -1,0 +1,58 @@
+[
+  {
+    "name": "homebrew/core",
+    "user": "homebrew",
+    "repo": "core",
+    "installed": true,
+    "official": true,
+    "formula_names": [],
+    "cask_tokens": [],
+    "command_files": []
+  },
+  {
+    "name": "homebrew/cask",
+    "user": "homebrew",
+    "repo": "cask",
+    "installed": true,
+    "official": true,
+    "formula_names": [],
+    "cask_tokens": [],
+    "command_files": []
+  },
+  {
+    "name": "homebrew/command-not-found",
+    "user": "homebrew",
+    "repo": "command-not-found",
+    "installed": true,
+    "official": true,
+    "formula_names": [],
+    "cask_tokens": [],
+    "command_files": [
+      "/opt/example/cmd/which-formula.rb"
+    ]
+  },
+  {
+    "name": "example-org/tools",
+    "user": "example-org",
+    "repo": "tools",
+    "installed": true,
+    "official": false,
+    "formula_names": [
+      "example-org/tools/example-tool"
+    ],
+    "cask_tokens": [],
+    "command_files": []
+  },
+  {
+    "name": "example-org/commands",
+    "user": "example-org",
+    "repo": "commands",
+    "installed": true,
+    "official": false,
+    "formula_names": [],
+    "cask_tokens": [],
+    "command_files": [
+      "/opt/example/Library/Taps/example-org/homebrew-commands/cmd/example.rb"
+    ]
+  }
+]

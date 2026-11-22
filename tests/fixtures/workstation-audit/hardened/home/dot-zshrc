@@ -1,0 +1,6 @@
+# Placeholder rc file.
+export PATH="$HOME/.local/bin:$PATH"
+if [ -n "${CLAUDECODE:-}" ] || [ -n "${CODEX_SANDBOX:-}" ]; then
+    return 0
+fi
+. "$HOME/.dotfiles.private.sh"

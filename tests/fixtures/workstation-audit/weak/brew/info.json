@@ -1,0 +1,23 @@
+{
+  "formulae": [
+    {
+      "name": "jq",
+      "full_name": "jq",
+      "tap": "homebrew/core"
+    },
+    {
+      "name": "example-tool",
+      "full_name": "example-org/tools/example-tool",
+      "tap": "example-org/tools"
+    }
+  ],
+  "casks": [
+    {
+      "token": "example-app",
+      "full_token": "example-app",
+      "tap": "homebrew/cask",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "auto_updates": true
+    }
+  ]
+}

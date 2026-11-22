@@ -1,0 +1,4 @@
+# pnpm global config (macOS: ~/Library/Preferences/pnpm/config.yaml).
+# Prefer: pnpm config set --global minimumReleaseAge 10080
+# Minutes; 10080 = 7 days. An explicit value makes minimumReleaseAgeStrict default to true.
+minimumReleaseAge: 10080

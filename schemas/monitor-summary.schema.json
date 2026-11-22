@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/monitor-summary.schema.json",
+  "title": "macOS security monitor summary",
+  "type": "object",
+  "required": ["schema", "record_type", "run_id", "started_at", "completed_at", "duration_seconds", "interval_seconds", "target_user", "report_dir", "snapshot_count", "event_count", "endpoint_security_event_count", "normalized_timeline_event_count", "correlation_finding_count", "visibility", "artifacts", "evidence_trust", "agent_guardrail", "next_actions"],
+  "properties": {
+    "schema": { "const": "macos-security-monitor/v1" },
+    "record_type": { "const": "monitor_summary" },
+    "duration_seconds": { "type": "integer", "minimum": 1, "maximum": 86400 },
+    "interval_seconds": { "type": "integer", "minimum": 1, "maximum": 60 },
+    "snapshot_count": { "type": "integer", "minimum": 1 },
+    "event_count": { "type": "integer", "minimum": 0 },
+    "endpoint_security_event_count": { "type": "integer", "minimum": 0 },
+    "normalized_timeline_event_count": { "type": "integer", "minimum": 0 },
+    "correlation_finding_count": { "type": "integer", "minimum": 0 },
+    "visibility": { "enum": ["full", "partial"] },
+    "network_telemetry": {
+      "type": "object",
+      "required": ["state"],
+      "properties": {
+        "state": {"enum": ["not_requested", "imported", "invalid"]},
+        "input_count": {"type": "integer", "minimum": 0},
+        "event_count": {"type": "integer", "minimum": 0},
+        "out_of_window_count": {"type": "integer", "minimum": 0},
+        "correlated_count": {"type": "integer", "minimum": 0},
+        "collection_coverage": {"const": "unknown"}
+      },
+      "if": {"properties": {"state": {"const": "imported"}}},
+      "then": {"required": ["input_count", "event_count", "out_of_window_count", "correlated_count", "collection_coverage", "window"]}
+    },
+    "artifacts": { "type": "object" },
+    "evidence_trust": { "const": "untrusted_observations" },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["purpose", "command", "requires_root"],
+        "properties": {
+          "purpose": { "type": "string" },
+          "command": { "type": "string" },
+          "requires_root": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

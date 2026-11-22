@@ -1,0 +1,47 @@
+{
+  "jq": {
+    "repository": "jqlang/jq",
+    "tag": "jq-1.8.2",
+    "assets": {
+      "Darwin-arm64": ["jq-macos-arm64", "2d75340ba57a4b4b4c8708a21c2dc8e958a48aaa8bba13b27f77f6e4c0eca07e"],
+      "Darwin-x86_64": ["jq-macos-amd64", "e94b266e3c26690550006abe63152b782280f4e14374accdf04cbde844f00bc0"],
+      "Linux-x86_64": ["jq-linux-amd64", "b1c22172dd303f3be49e935aa56aa48a8b7a46e0bc838b4997d3bb451495870f"]
+    }
+  },
+  "shellcheck": {
+    "repository": "koalaman/shellcheck",
+    "tag": "v0.11.0",
+    "member": "shellcheck-v0.11.0/shellcheck",
+    "assets": {
+      "Darwin-arm64": ["shellcheck-v0.11.0.darwin.aarch64.tar.gz", "339b930feb1ea764467013cc1f72d09cd6b869ebf1013296ba9055ab2ffbd26f"],
+      "Darwin-x86_64": ["shellcheck-v0.11.0.darwin.x86_64.tar.gz", "c2c15e08df0e8fbc374c335b230a7ee958c313fa5714817a59aa59f1aa594f51"]
+    }
+  },
+  "gitleaks": {
+    "repository": "gitleaks/gitleaks",
+    "tag": "v8.30.1",
+    "member": "gitleaks",
+    "assets": {
+      "Darwin-arm64": ["gitleaks_8.30.1_darwin_arm64.tar.gz", "b40ab0ae55c505963e365f271a8d3846efbc170aa17f2607f13df610a9aeb6a5"],
+      "Linux-x86_64": ["gitleaks_8.30.1_linux_x64.tar.gz", "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"]
+    }
+  },
+  "actionlint": {
+    "repository": "rhysd/actionlint",
+    "tag": "v1.7.12",
+    "member": "actionlint",
+    "assets": {
+      "Darwin-arm64": ["actionlint_1.7.12_darwin_arm64.tar.gz", "aba9ced2dee8d27fecca3dc7feb1a7f9a52caefa1eb46f3271ea66b6e0e6953f"],
+      "Linux-x86_64": ["actionlint_1.7.12_linux_amd64.tar.gz", "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"]
+    }
+  },
+  "zizmor": {
+    "repository": "zizmorcore/zizmor",
+    "tag": "v1.32.0",
+    "member": "zizmor",
+    "assets": {
+      "Darwin-arm64": ["zizmor-aarch64-apple-darwin.tar.gz", "6efed18c4539a663fd3c851a2be9533fd8456c4e646d9416206da059154a0d3c"],
+      "Linux-x86_64": ["zizmor-x86_64-unknown-linux-gnu.tar.gz", "bb110cc765eca9cd7efb2e284a956be5974c60027b0970f16397d86208a9957b"]
+    }
+  }
+}

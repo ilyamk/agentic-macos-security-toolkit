@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "local": {
+      "command": "node",
+      "args": [
+        "/Users/example/my-project/server.js"
+      ]
+    }
+  }
+}

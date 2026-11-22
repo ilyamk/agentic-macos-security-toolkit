@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/security-policy.schema.json",
+  "title": "macOS Security Policy",
+  "type": "object",
+  "required": [
+    "schema",
+    "policy_id",
+    "threat_model",
+    "expected_services",
+    "remediation"
+  ],
+  "properties": {
+    "schema": {
+      "const": "macos-security-policy/v1"
+    },
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "threat_model": {
+      "type": "object",
+      "required": [
+        "name",
+        "asset_value",
+        "assumptions"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "asset_value": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected_services": {
+      "type": "object",
+      "required": [
+        "screen_sharing",
+        "smb_guest",
+        "remote_login",
+        "remote_management",
+        "legacy_vnc"
+      ],
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "trusted_network_scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_extension_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-p]{32}$"
+      }
+    },
+    "adapters": {
+      "type": "object",
+      "properties": {
+        "assessment": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "incident": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "developer": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "monitoring": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "dependency_policy": {
+      "type": "object",
+      "properties": {
+        "auto_install": {
+          "type": "boolean"
+        },
+        "manager": {
+          "const": "homebrew"
+        },
+        "allow_casks": {
+          "type": "boolean"
+        },
+        "allow_network": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "collect_secret_values": {
+          "const": false
+        },
+        "online_hash_lookup": {
+          "const": false
+        },
+        "default_redaction": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "remediation": {
+      "type": "object",
+      "required": [
+        "auto_apply",
+        "require_confirmation",
+        "require_rollback"
+      ],
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

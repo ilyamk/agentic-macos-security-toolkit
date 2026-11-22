@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/remediation-plan.schema.json",
+  "title": "macOS security remediation plan",
+  "type": "object",
+  "required": ["schema", "record_type", "generated_at", "source_report", "apply_authorized", "guardrails", "counts", "actions", "next_actions"],
+  "properties": {
+    "schema": { "const": "macos-security-remediation-plan/v1" },
+    "record_type": { "const": "remediation_plan" },
+    "generated_at": { "type": "string" },
+    "source_report": { "type": "string" },
+    "source_run_id": { "type": ["string", "null"] },
+    "source_policy": { "type": ["string", "null"] },
+    "source_collection_args": { "type": "array", "items": { "type": "string" } },
+    "source_collection_requires_root": { "type": "boolean" },
+    "apply_authorized": { "const": false },
+    "safety_guardrail": { "type": "string" },
+    "guardrails": { "type": "array", "items": { "type": "string" } },
+    "counts": {
+      "type": "object",
+      "required": ["proposed", "apply_supported"],
+      "properties": {
+        "proposed": { "type": "integer", "minimum": 0 },
+        "apply_supported": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "reason", "status", "apply_supported", "required_privilege", "steps", "rollback", "requires_human_review", "source_finding_ids"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "status": { "const": "proposed" },
+          "apply_supported": { "type": "boolean" },
+          "required_privilege": { "enum": ["root", "administrator", "target_user"] },
+          "steps": { "type": "array", "items": { "type": "string" } },
+          "rollback": { "type": "string" },
+          "requires_human_review": { "const": true },
+          "source_finding_ids": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+        }
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["purpose", "command", "requires_root"],
+        "properties": {
+          "purpose": { "type": "string" },
+          "command": { "type": "string" },
+          "requires_root": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

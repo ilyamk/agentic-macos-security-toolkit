@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/security-policy.schema.json",
+  "schema": "macos-security-policy/v1",
+  "policy_id": "personal-remote-development-mac",
+  "threat_model": {
+    "name": "Personal development Mac with intentional remote Screen Sharing",
+    "asset_value": "high",
+    "assumptions": [
+      "Screen Sharing is intentional and must be restricted to approved local users.",
+      "Remote access is expected only over trusted LAN or authenticated VPN.",
+      "Unauthenticated SMB guest sharing is not required.",
+      "The device is single-primary-user but contains development credentials and browser wallets."
+    ]
+  },
+  "expected_services": {
+    "screen_sharing": true,
+    "smb_guest": false,
+    "remote_login": false,
+    "remote_management": false,
+    "legacy_vnc": false
+  },
+  "trusted_network_scopes": ["loopback", "lan", "tailscale"],
+  "expected_extension_ids": [],
+  "adapters": {
+    "assessment": ["knockknock"],
+    "incident": ["knockknock", "clamav"],
+    "developer": ["osv-scanner", "gitleaks"],
+    "monitoring": []
+  },
+  "dependency_policy": {
+    "auto_install": false,
+    "manager": "homebrew",
+    "allow_casks": true,
+    "allow_network": true
+  },
+  "privacy": {
+    "collect_secret_values": false,
+    "online_hash_lookup": false,
+    "default_redaction": false
+  },
+  "remediation": {
+    "auto_apply": false,
+    "require_confirmation": true,
+    "require_rollback": true
+  }
+}

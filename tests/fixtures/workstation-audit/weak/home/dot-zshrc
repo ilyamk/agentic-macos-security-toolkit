@@ -1,0 +1,6 @@
+# Placeholder rc file.
+[ -f "$HOME/.env" ] && . "$HOME/.env"
+if [ -n "${CLAUDECODE:-}" ]; then
+    return 0
+fi
+export EDITOR=nvim

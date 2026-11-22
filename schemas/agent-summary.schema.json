@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/agent-summary.schema.json",
+  "title": "macOS Security Agent Summary",
+  "type": "object",
+  "required": ["schema", "record_type", "evidence_trust", "agent_guardrail", "risk_dimensions", "compromise_assessment", "requires_review", "counts", "priorities"],
+  "properties": {
+    "schema": {"const": "macos-security-agent-summary/v1"},
+    "record_type": {"const": "agent_summary"},
+    "evidence_trust": {"const": "untrusted_observations"},
+    "risk_dimensions": {
+      "type": "object",
+      "required": ["configuration_risk", "network_exposure", "anomaly_level", "detection_level", "visibility"]
+    },
+    "requires_review": {"type": "boolean"},
+    "priorities": {"type": "array"}
+  }
+}

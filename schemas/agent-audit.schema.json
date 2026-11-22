@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/agent-audit.schema.json",
+  "title": "Declared agent and MCP permissions",
+  "type": "object",
+  "required": ["schema", "record_type", "effective_permissions", "coverage", "configurations", "changes", "requires_review", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-agent-audit/v1"},
+    "record_type": {"const": "agent_audit"},
+    "effective_permissions": {"const": "unknown"},
+    "coverage": {"enum": ["selected_scope", "partial"]},
+    "configurations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["client", "scope", "component", "state", "declared"],
+        "properties": {
+          "client": {"enum": ["claude", "cursor", "codex"]},
+          "scope": {"enum": ["user", "project"]},
+          "component": {"enum": ["mcp", "settings", "local_settings", "registered_project"]},
+          "state": {"enum": ["parsed", "heuristic", "absent", "unavailable", "unparsed"]},
+          "declared": {
+            "type": ["object", "null"],
+            "required": ["unrestricted_sandbox", "automatic_approval", "broad_roots", "cleartext_http", "inline_credentials", "local_servers", "remote_servers", "declared_oauth_scopes"],
+            "properties": {
+              "unrestricted_sandbox": {"type": "boolean"},
+              "automatic_approval": {"type": "boolean"},
+              "broad_roots": {"type": "boolean"},
+              "cleartext_http": {"type": "boolean"},
+              "inline_credentials": {"type": "boolean"},
+              "local_servers": {"type": "integer", "minimum": 0},
+              "remote_servers": {"type": "integer", "minimum": 0},
+              "declared_oauth_scopes": {"type": ["integer", "null"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["client", "scope", "component", "expanded"],
+        "properties": {
+          "client": {"enum": ["claude", "cursor", "codex"]},
+          "scope": {"enum": ["user", "project"]},
+          "component": {"enum": ["mcp", "settings", "local_settings", "registered_project"]},
+          "expanded": {
+            "enum": ["unrestricted_sandbox", "automatic_approval", "broad_roots", "cleartext_http", "inline_credentials", "local_servers", "remote_servers", "declared_oauth_scopes"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "requires_review": {"type": "boolean"},
+    "evidence_trust": {"const": "untrusted_observations"}
+  },
+  "additionalProperties": false
+}

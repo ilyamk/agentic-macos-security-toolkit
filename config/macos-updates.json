@@ -1,0 +1,11 @@
+{
+  "schema": "macos-security-update-catalogue/v1",
+  "reviewed_at": "2026-11-22",
+  "valid_until": "2026-12-22",
+  "index": "https://support.apple.com/en-us/100100",
+  "branches": {
+    "15": {"version": "15.8.3", "released_at": "2026-11-09", "source": "https://support.apple.com/en-us/149720"},
+    "26": {"version": "26.7.3", "released_at": "2026-11-09", "source": "https://support.apple.com/en-us/149719"},
+    "27": {"version": "27.2.1", "released_at": "2026-11-09", "source": "https://support.apple.com/en-us/149718"}
+  }
+}

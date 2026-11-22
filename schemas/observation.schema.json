@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/observation.schema.json",
+  "title": "Normalized macOS security observation",
+  "type": "object",
+  "required": ["schema", "record_type", "observed_at", "id", "category", "state", "summary", "evidence_ref", "sensitivity", "data", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-observation/v1"},
+    "record_type": {"const": "observation"},
+    "observed_at": {"type": "string"},
+    "id": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "minLength": 1},
+    "state": {"enum": ["collected", "partial", "not_found", "unknown"]},
+    "summary": {"type": "string"},
+    "evidence_ref": {"type": "string"},
+    "sensitivity": {"enum": ["low", "medium", "high", "secret"]},
+    "data": {"type": ["object", "array", "string", "number", "boolean", "null"]},
+    "evidence_trust": {"const": "untrusted_observations"}
+  }
+}

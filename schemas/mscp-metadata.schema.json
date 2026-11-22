@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/mscp-metadata.schema.json",
+  "title": "Owner-supplied mSCP release and profile",
+  "type": "object",
+  "required": ["schema", "release", "profile"],
+  "properties": {
+    "schema": {"const": "macos-security-mscp-metadata/v1"},
+    "release": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+    "profile": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"}
+  }
+}

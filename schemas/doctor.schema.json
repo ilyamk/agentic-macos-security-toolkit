@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/doctor.schema.json",
+  "title": "Local readiness and visibility",
+  "type": "object",
+  "required": ["schema", "record_type", "state"],
+  "properties": {
+    "schema": {"const": "macos-security-doctor/v1"},
+    "record_type": {"const": "doctor"},
+    "state": {"enum": ["ready", "unsupported_os", "incomplete"]},
+    "missing": {"type": "array", "items": {"const": "jq"}},
+    "platform": {"type": "string"},
+    "profile": {"enum": ["personal", "personal-remote-development", "developer", "high-risk"]},
+    "elevated": {"type": "boolean"},
+    "commands": {
+      "type": "object",
+      "required": ["jq", "git", "brew"],
+      "properties": {"jq": {"const": true}, "git": {"type": "boolean"}, "brew": {"type": "boolean"}},
+      "additionalProperties": false
+    },
+    "dependency_policy": {"type": "object"},
+    "default_checks": {"type": "object"},
+    "relative_path_entries": {"type": "integer", "minimum": 0}
+  },
+  "additionalProperties": false
+}

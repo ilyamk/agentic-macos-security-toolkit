@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/update-status.schema.json",
+  "title": "macOS update status",
+  "type": "object",
+  "required": ["schema", "record_type", "baseline", "installed_build", "software_update", "background_security", "mscp", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-update-status/v1"},
+    "record_type": {"const": "update_status"},
+    "baseline": {
+      "type": "object",
+      "required": ["installed_version", "branch", "reference", "reviewed_at", "valid_until", "index", "status"],
+      "properties": {
+        "installed_version": {"type": "string"},
+        "branch": {"type": ["string", "null"]},
+        "reference": {
+          "type": ["object", "null"],
+          "required": ["version", "released_at", "source"],
+          "properties": {
+            "version": {"type": "string"},
+            "released_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+            "source": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "reviewed_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "valid_until": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "index": {"type": "string"},
+        "status": {"enum": ["stale", "unknown", "unlisted", "behind", "at_or_above_reference"]}
+      },
+      "additionalProperties": false
+    },
+    "installed_build": {"type": "string"},
+    "software_update": {
+      "type": "object",
+      "required": ["state", "offered_restart_required"],
+      "properties": {
+        "state": {"enum": ["not_requested", "unknown", "available", "none_reported"]},
+        "offered_restart_required": {"type": ["boolean", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "background_security": {
+      "type": "object",
+      "required": ["installed_state", "reported_supplement", "pending_restart"],
+      "properties": {
+        "installed_state": {"enum": ["unknown", "supplement_reported"]},
+        "reported_supplement": {"type": ["string", "null"]},
+        "pending_restart": {"const": null}
+      },
+      "additionalProperties": false
+    },
+    "mscp": {
+      "type": ["object", "null"],
+      "required": ["release", "profile", "provenance"],
+      "properties": {
+        "release": {"type": "string"},
+        "profile": {"type": "string"},
+        "provenance": {"const": "user_supplied_metadata"}
+      },
+      "additionalProperties": false
+    },
+    "evidence_trust": {"const": "untrusted_observations"}
+  },
+  "additionalProperties": false
+}

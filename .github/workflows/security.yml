@@ -1,0 +1,77 @@
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '47 4 * * 2'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository:
+    name: Repository security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install verified security tooling
+        run: |
+          ./tools/ci/install-tools.sh "$RUNNER_TEMP/msc-bin" jq gitleaks actionlint zizmor
+          printf '%s\n' "$RUNNER_TEMP/msc-bin" >> "$GITHUB_PATH"
+      - name: Validate repository contents and workflows
+        shell: sh
+        run: |
+          ./tools/ci/check-public-tree.sh HEAD
+          for workflow in .github/workflows/*.yml; do
+            case "$workflow" in
+              */scorecard.yml)
+                actionlint -color -ignore '^unexpected key "cache-mode" for "workflow" section\.' "$workflow" ;;
+              *) actionlint -color "$workflow" ;;
+            esac
+          done
+          zizmor --offline --min-severity low --min-confidence medium .github/workflows/
+      - name: Scan Git history
+        run: ./tools/ci/scan-git-secrets.sh
+      - name: Test the pinned Gitleaks adapter with synthetic input
+        run: ./tests/unit/test_gitleaks_canary.sh
+
+  dependencies:
+    name: Dependency review
+    if: github.event_name == 'pull_request' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime, development, unknown
+
+  upstream:
+    name: Report upstream versions and advisories
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Query public upstream repositories
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./tools/ci/report-dependencies.sh
+      - name: Check the macOS update catalogue
+        run: ./tools/ci/check-update-catalogue.sh

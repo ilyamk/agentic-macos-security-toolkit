@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/agent-action.schema.json",
+  "title": "Read-only agent action result",
+  "type": "object",
+  "required": ["schema", "record_type", "action", "bundle_sha256", "evidence_trust"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "macos-security-agent-action/v1"},
+    "record_type": {"const": "agent_action"},
+    "action": {"enum": ["review-coverage", "review-finding"]},
+    "bundle_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "evidence_trust": {"const": "untrusted_observations"},
+    "coverage": {"type": "array", "items": {
+      "type": "object",
+      "required": ["state", "required", "count"],
+      "additionalProperties": false,
+      "properties": {
+        "state": {"enum": ["collected", "partial", "denied", "not_installed", "not_supported", "timeout", "error", "not_requested"]},
+        "required": {"type": "boolean"},
+        "count": {"type": "integer", "minimum": 1}
+      }
+    }},
+    "finding": {
+      "type": "object",
+      "required": ["ordinal", "source", "status", "severity", "confidence", "class", "control"],
+      "additionalProperties": false,
+      "properties": {
+        "ordinal": {"type": "integer", "minimum": 1},
+        "source": {"enum": ["posture", "triage", "monitor", "native", "adapters"]},
+        "status": {"enum": ["pass", "info", "warn", "fail", "error", "unknown"]},
+        "severity": {"enum": ["info", "low", "medium", "high", "critical"]},
+        "confidence": {"enum": ["low", "medium", "high"]},
+        "class": {"enum": ["configuration", "exposure", "anomaly", "detection", "visibility_gap"]},
+        "control": {"enum": [null, "macos_patch_level", "offered_updates", "system_integrity_protection", "filevault", "gatekeeper", "application_firewall", "firewall_stealth", "remote_login", "screen_sharing"]}
+      }
+    },
+    "owner_step": {"type": "string"}
+  },
+  "if": {"properties": {"action": {"const": "review-coverage"}}},
+  "then": {"required": ["coverage"]},
+  "else": {"required": ["finding", "owner_step"]}
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/posture-record.schema.json",
+  "title": "macOS security posture JSONL record",
+  "type": "object",
+  "required": ["schema_version", "record_type"],
+  "properties": {
+    "schema_version": { "const": "3.0" },
+    "record_type": { "enum": ["meta", "finding", "evidence", "summary"] },
+    "evidence_trust": { "const": "untrusted_observations" },
+    "id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["PASS", "WARN", "FAIL", "INFO", "UNKNOWN"] },
+    "severity": { "enum": ["none", "low", "medium", "high", "critical"] },
+    "collection_state": { "enum": ["collected", "denied", "error", "unavailable", "timeout", "skipped"] },
+    "sensitivity": { "enum": ["low", "medium", "high", "critical"] },
+    "requires_root": { "type": "boolean" },
+    "exit_code": { "type": "integer" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "record_type": { "const": "finding" } } },
+      "then": { "required": ["id", "category", "status", "severity", "title", "summary", "evidence", "recommendation", "reference"] }
+    },
+    {
+      "if": { "properties": { "record_type": { "const": "evidence" } } },
+      "then": { "required": ["id", "category", "title", "collection_state", "sensitivity", "requires_root", "source", "exit_code", "data", "error"] }
+    },
+    {
+      "if": { "properties": { "record_type": { "const": "summary" } } },
+      "then": { "required": ["completed_at_utc", "findings", "evidence"] }
+    }
+  ],
+  "additionalProperties": true
+}

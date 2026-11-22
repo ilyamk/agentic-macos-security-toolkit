@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/macos-security/coverage.schema.json",
+  "title": "macOS security collection coverage",
+  "type": "object",
+  "required": ["schema", "record_type", "observed_at", "component", "state", "required", "tool", "detail", "evidence_trust"],
+  "properties": {
+    "schema": {"const": "macos-security-coverage/v1"},
+    "record_type": {"const": "coverage"},
+    "observed_at": {"type": "string"},
+    "component": {"type": "string", "minLength": 1},
+    "state": {"enum": ["collected", "partial", "denied", "timeout", "not_installed", "not_supported", "error", "not_requested"]},
+    "required": {"type": "boolean"},
+    "tool": {"type": "string"},
+    "detail": {"type": "string"},
+    "evidence_ref": {"type": ["string", "null"]},
+    "evidence_trust": {"const": "untrusted_observations"}
+  }
+}

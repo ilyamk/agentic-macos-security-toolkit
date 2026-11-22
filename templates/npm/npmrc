@@ -1,0 +1,5 @@
+# User npm config (~/.npmrc). Requires npm 11.19 or newer; older npm ignores these keys silently.
+# See playbooks/PB-01 section 7.
+# Supply-chain hardening
+min-release-age=7
+strict-allow-scripts=true
