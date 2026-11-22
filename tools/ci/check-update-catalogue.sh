@@ -8,7 +8,7 @@ jq -e --arg today "$today" '.reviewed_at<=$today and .valid_until>=$today' "$cat
     printf '%s\n' 'The pinned macOS security catalogue needs review.' >&2
     exit 1
 }
-feed=$(curl -q --fail --silent --show-error --proto '=https' --connect-timeout 10 \
+feed=$(/usr/bin/curl -q --fail --silent --show-error --proto '=https' --connect-timeout 10 \
     --max-time 30 --max-filesize 2097152 https://gdmf.apple.com/v2/pmv)
 result=$(printf '%s\n' "$feed" | jq -ces --slurpfile catalogue "$catalogue" --arg today "$today" '
     def parts: (split(".")|map(tonumber)) + [0,0] | .[0:3];
