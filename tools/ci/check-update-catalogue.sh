@@ -8,7 +8,21 @@ jq -e --arg today "$today" '.reviewed_at<=$today and .valid_until>=$today' "$cat
     printf '%s\n' 'The pinned macOS security catalogue needs review.' >&2
     exit 1
 }
-feed=$(/usr/bin/curl -q --fail --silent --show-error --proto '=https' --connect-timeout 10 \
+
+# The Apple update feed uses Apple Root CA, which is absent from some runner trust stores.
+umask 077
+cert_dir=$(mktemp -d)
+trap 'rm -f "$cert_dir/root.cer" "$cert_dir/root.pem"; rmdir "$cert_dir"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+/usr/bin/curl -q --fail --silent --show-error --proto '=https' --connect-timeout 10 \
+    --max-time 30 --max-filesize 8192 --output "$cert_dir/root.cer" \
+    https://www.apple.com/appleca/AppleIncRootCertificate.cer
+printf '%s  %s\n' b0b1730ecbc7ff4505142c49f1295e6eda6bcaed7e2c68c5be91b5a11001f024 \
+    "$cert_dir/root.cer" | shasum --algorithm 256 --check --status
+/usr/bin/openssl x509 -inform DER -in "$cert_dir/root.cer" -out "$cert_dir/root.pem"
+
+feed=$(/usr/bin/curl -q --fail --silent --show-error --proto '=https' --cacert "$cert_dir/root.pem" --connect-timeout 10 \
     --max-time 30 --max-filesize 2097152 https://gdmf.apple.com/v2/pmv)
 result=$(printf '%s\n' "$feed" | jq -ces --slurpfile catalogue "$catalogue" --arg today "$today" '
     def parts: (split(".")|map(tonumber)) + [0,0] | .[0:3];

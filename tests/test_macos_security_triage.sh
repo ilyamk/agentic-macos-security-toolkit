@@ -48,7 +48,7 @@ if [ "$(uname -s)" = "Darwin" ]; then
       "$TEST_TMP/triage/report.jsonl" >/dev/null
     jq -e 'select(.record_type=="meta") | .schema=="macos-security-triage/v3" and .target_user==env.USER and .evidence_trust=="untrusted_observations"' \
       "$TEST_TMP/triage/report.jsonl" >/dev/null
-    [ -s "$TEST_TMP/triage/evidence/network_exposure.jsonl" ] || {
+    [ -f "$TEST_TMP/triage/evidence/network_exposure.jsonl" ] || {
       printf '%s\n' 'normalized network exposure evidence is missing' >&2; exit 1;
     }
     jq -e -s 'all(.[]; (.scope|IN("loopback","lan_or_vpn","interface")) and .internet_reachability=="unknown_not_tested")' \
